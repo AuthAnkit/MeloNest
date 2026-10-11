@@ -28,6 +28,7 @@ public class UserController {
 
     @PostMapping("/loginUN")
     public  ResponseEntity<String> loginUserUN(@RequestBody UserLoginRequestUN request){
+        System.out.println("LOGIN CONTROLLER REACHED");
         UserLoginResponse rep  =  authUserServices.loginUserUN(request);
         return ResponseEntity.status(HttpStatus.OK)
                 .body("User logged in successfully: Hello ," + rep.getUsername());

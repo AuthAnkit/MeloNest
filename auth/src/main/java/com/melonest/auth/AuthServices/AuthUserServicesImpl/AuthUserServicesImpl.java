@@ -10,6 +10,7 @@ import com.melonest.auth.AuthRepo.UserRepository;
 import com.melonest.auth.AuthServices.AuthUserServices;
 import com.melonest.auth.AuthTransformer.toResponse;
 import com.melonest.auth.AuthTransformer.toUser;
+import com.melonest.auth.Exceptions.InvalidCredentialsException;
 import com.melonest.auth.Exceptions.UserAlreadyExists;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,30 +40,30 @@ public class AuthUserServicesImpl implements AuthUserServices {
         return toResponse.ToResponse(savedUser);
     }
 
-    @Override
-    public UserLoginResponse loginUserUN(@RequestBody UserLoginRequestUN request){
-        User user = userRepository.findByusername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        @Override
+        public UserLoginResponse loginUserUN(@RequestBody UserLoginRequestUN request){
+            User user = userRepository.findByusername(request.getUsername())
+                    .orElseThrow(() -> new InvalidCredentialsException("User not found"));
 
-        if(user.getPassword()==null || !passwordEncoder.matches(request.getPassword(),user.getPassword())){
-            throw new RuntimeException("Invalid username or password");
+            if(user.getPassword()==null || !passwordEncoder.matches(request.getPassword(),user.getPassword())){
+                throw new InvalidCredentialsException("Invalid username or password");
+            }
+            return new UserLoginResponse().builder()
+                    .email(user.getEmail())
+                    .username(user.getUsername())
+                    .build();
         }
-        return new UserLoginResponse().builder()
-                .email(user.getEmail())
-                .username(user.getUsername())
-                .build();
-    }
 
-    @Override
-    public UserLoginResponse loginUserEmail(@RequestBody UserLoginRequestEmail request){
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        if(user.getPassword()==null || !passwordEncoder.matches(request.getPassword(),user.getPassword())){
-            throw new RuntimeException("Invalid username or password");
+        @Override
+        public UserLoginResponse loginUserEmail(@RequestBody UserLoginRequestEmail request){
+            User user = userRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new InvalidCredentialsException("User not found"));
+            if(user.getPassword()==null || !passwordEncoder.matches(request.getPassword(),user.getPassword())){
+                throw new InvalidCredentialsException("Invalid email or password");
+            }
+            return new UserLoginResponse().builder()
+                    .email(user.getEmail())
+                    .username(user.getUsername())
+                    .build();
         }
-        return new UserLoginResponse().builder()
-                .email(user.getEmail())
-                .username(user.getUsername())
-                .build();
     }
-}
